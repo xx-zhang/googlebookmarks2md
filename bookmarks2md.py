@@ -56,7 +56,7 @@ def main(book_marks_path):
         md_string += """## {}""".format(x["mark_tag"]) +"\n"
         md_string += """> _创建时间_ **{}**  _最后修改_ **{}**>>""".format(x["add_date"], x["last_modify"]) +"\n"
         md_string += "> \n"
-        md_string += "|{mark_name}|{href}|{add_date}|\n".format(**dict( href="链接", add_date="添加时间", mark_name="书签名称",))
+        md_string += "|:{mark_name}|:{href}|:{add_date}|\n".format(**dict( href="链接", add_date="添加时间", mark_name="书签名称",))
         md_string += "|------------------|------------------|-----------------|" + "\n"
         for mark in x["marks"]:
             md_string += "|[{mark_name}]({href})|{href}|{add_date}|".format(**mark) + "\n"
