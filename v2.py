@@ -1,6 +1,8 @@
 import re
 from datetime import datetime
 
+from urllib.parse import urlparse
+
 
 def timestamp2strdt(timestamp):
     # datetime.fromtimestamp(timeStamp).strftime("%Y-%m-%d %H:%M:%S.%f")
@@ -14,8 +16,9 @@ def trans_2_md(string):
     :param string:
     :return:
     """
-    partern = """<DT><H3 ADD_DATE="(\d+)" LAST_MODIFIED="(\d+)">(.*?)</H3>.*?<DL><p>(.*?)</DL><p>"""
-    datas = re.findall(partern, string)
+    # datas = re.findall(partern, string)
+    rx = re.compile("""<H3 ADD_DATE="(\d+)" LAST_MODIFIED="(\d+)".*?>(.*?)</H3>\s*<DL><p>(.*?)<\DL><p>""")
+    datas = rx.findall(string)
     results = []
     for add_date, last_modify, mark_tag, contents in datas:
         info = dict(
@@ -25,14 +28,17 @@ def trans_2_md(string):
             type="d",
             childs=trans_2_md(contents)
         )
-        line_partern = """<DT><A HREF="(.*?)" ADD_DATE="(\d+)".*?">(.*?)</A>"""
+        line_partern = """<A HREF="(.*?)" ADD_DATE="(\d+)".*?">(.*?)</A>"""
         _marks = re.findall(line_partern, contents)
         marks = []
         for href, add_date, mark_name in _marks:
             marks.append(dict(
                 href=href,
+                host=str(urlparse(href).netloc),
+                scheme=urlparse(href).scheme,
                 add_date=timestamp2strdt(add_date),
-                mark_name=mark_name.replace("|","_").replace(".", "。")[:40],
+                mark_name=mark_name.replace("|","_").replace(".", "。").replace(
+                    "[", "【").replace("]", "】")[:40],
                 type="f"
             ))
 
@@ -49,6 +55,8 @@ def main(book_marks_path):
     """
     with open(book_marks_path, "r", encoding="utf-8") as f:
         string = f.read().replace("\n", "")
+        # 修改DT这种象征性换行的标签为空; DT就是一个换行的标志。
+        string = string.replace("<DT>", "")
         f.close()
     results = trans_2_md(string)
     md_string = """"""
@@ -56,18 +64,21 @@ def main(book_marks_path):
         md_string += """## {}""".format(x["mark_tag"]) +"\n"
         md_string += """> _创建时间_ **{}**  _最后修改_ **{}**>>""".format(x["add_date"], x["last_modify"]) +"\n"
         md_string += "> \n"
+        #md_string += "|{mark_name}|{href}|{add_date}|\n".format(**dict( href="链接", add_date="添加时间", mark_name="书签名称",))
         md_string += "|{mark_name}|{href}|{add_date}|\n".format(**dict( href="链接", add_date="添加时间", mark_name="书签名称",))
         md_string += "|------------------|------------------|-----------------|" + "\n"
         for mark in x["marks"]:
-            md_string += "|[{mark_name}]({href})|{href}|{add_date}|".format(**mark) + "\n"
+            md_string += "|[{mark_name}]({href})|{host}|{add_date}|".format(**mark) + "\n"
         md_string += "\n"
 
-    with open("output.md", "w+", encoding="utf-8") as f:
+    with open("v2.md", "w+", encoding="utf-8") as f:
         f.write(md_string)
         f.close()
 
+    return True
+
 
 if __name__ == '__main__':
-    book_marks_path = "e://bookmarks_2019_6_3.html"
+    book_marks_path = "e://v2.html"
     main(book_marks_path)
 
