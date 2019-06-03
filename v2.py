@@ -1,4 +1,5 @@
 import re
+import sys
 from datetime import datetime
 
 from urllib.parse import urlparse
@@ -6,7 +7,12 @@ from urllib.parse import urlparse
 
 def timestamp2strdt(timestamp):
     # datetime.fromtimestamp(timeStamp).strftime("%Y-%m-%d %H:%M:%S.%f")
-    return datetime.fromtimestamp(int(timestamp)).strftime("%Y-%m-%d %H:%M:%S")
+
+    try:
+        return datetime.fromtimestamp(int(timestamp)).strftime("%Y-%m-%d %H:%M:%S")
+    except:
+        print("ERROR: 错误的日期格式化-->"+ timestamp)
+        return str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
 def trans_2_md(string):
@@ -47,7 +53,7 @@ def trans_2_md(string):
     return results
 
 
-def main(book_marks_path):
+def main(book_marks_path, output="output.md"):
     """
     主要执行的函数
     :param book_marks_path: 输入你的导出书签html的位置
@@ -71,7 +77,7 @@ def main(book_marks_path):
             md_string += "|[{mark_name}]({href})|{host}|{add_date}|".format(**mark) + "\n"
         md_string += "\n"
 
-    with open("v2.md", "w+", encoding="utf-8") as f:
+    with open(output, "w+", encoding="utf-8") as f:
         f.write(md_string)
         f.close()
 
@@ -79,6 +85,14 @@ def main(book_marks_path):
 
 
 if __name__ == '__main__':
-    book_marks_path = "e://v2.html"
-    main(book_marks_path)
+    print("使用说明: python3 v2.py e://test.html a.md")
+    if len(sys.argv) < 2:
+        raise EOFError("必须指定一个Google书签html文件路径")
+    google_marks_html_path = sys.argv[1]
+    try:
+        output = sys.argv[2]
+    except:
+        print("第二个参数是输出的文件位置")
+        output = "output.md"
+    main(google_marks_html_path, output)
 
