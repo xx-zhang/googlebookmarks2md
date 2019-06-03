@@ -68,6 +68,6 @@ def main(book_marks_path):
 
 
 if __name__ == '__main__':
-    book_marks_path = "D://bookmarks_2019_6_3.html"
+    book_marks_path = "e://bookmarks_2019_6_3.html"
     main(book_marks_path)
 
