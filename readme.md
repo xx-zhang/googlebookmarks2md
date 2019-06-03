@@ -11,3 +11,5 @@
 # 开发
 > 注意这个格式无法用bs4的html.parse标签不是对称的。
 
+# 改进
+> 简单用 `sys.args` 封装了下， 但是必须用 `pyhton v2.py [input] [out]` 输出了
